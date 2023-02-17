@@ -1,0 +1,76 @@
+---
+// import Hls from 'hls.js'
+export interface Props {
+	src: string;
+}
+const { src }  = Astro.props
+---
+
+<script>
+	import Hls from 'hls.js'
+	export class HLSPlayer extends HTMLVideoElement {
+		hls: Hls;
+		static get observedAttributes() {
+			return ['src']
+		}
+		constructor() {
+			super();
+		}
+		/**
+		 * Is called whenever a observed attribute changes
+		 *
+		 * @param {string} atb the attribute that changed
+		 * @param {string} current the current attribute value
+		 * @param {string} newValue the new attribute value
+		 * @memberof HLSPlayer
+		 */
+		attributeChangedCallback(atb, current, newValue) {
+			if(
+				!newValue || //if value is not empty
+				current === newValue || //ignore if the value is the same
+				-1 < newValue.indexOf('blob:http') // ignore hls.js changing the src
+			) { return; }
+
+			switch(atb) {
+				case 'src':
+					if (this.hls) {
+						this.hls.destroy();
+					}
+					this.hls = new Hls({debug:true,enableWorker:false});
+					this.hls.attachMedia(this);
+					this.hls.loadSource(newValue);
+					break;
+			}
+		}
+	}
+	customElements.define('hls-js', HLSPlayer, { extends: 'video' })
+
+	class AstroVideo extends HTMLElement {
+		constructor() {
+			super();
+
+			// Read the message from the data attribute
+			const videoSrc = this.dataset.src
+			var video = document.querySelector('video')
+
+			if(Hls.isSupported()) {
+				var hls = new Hls();
+				hls.loadSource(videoSrc);
+				hls.attachMedia(video);
+				video.play()
+			}
+		}
+	}
+	customElements.define('astro-video', AstroVideo);
+</script>
+<video autoplay is="hls-js" src={src}></video>
+<style>
+	video {
+		position: fixed;
+		left: 0;
+		top: 0;
+		min-width: 100%;
+		min-height: 100%;
+		z-index: -10;
+	}
+</style>
