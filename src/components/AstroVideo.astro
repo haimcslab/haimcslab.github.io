@@ -36,10 +36,14 @@ const { src }  = Astro.props
 					if (this.hls) {
 						this.hls.destroy();
 					}
+					if(this.canPlayType('application/vnd.apple.mpegurl')) {
+						this.src = newValue
+					} else if (Hls.isSupported()) {
+						this.hls = new Hls({enableWorker:false});
+						this.hls.attachMedia(this);
+						this.hls.loadSource(newValue);
+					}
 					this.muted = true;
-					this.hls = new Hls({enableWorker:false});
-					this.hls.attachMedia(this);
-					this.hls.loadSource(newValue);
 					this.play()
 					break;
 			}
