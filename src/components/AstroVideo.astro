@@ -37,7 +37,7 @@ const { src }  = Astro.props
 						this.hls.destroy();
 					}
 					this.muted = true;
-					this.hls = new Hls({debug:true,enableWorker:false});
+					this.hls = new Hls({enableWorker:false});
 					this.hls.attachMedia(this);
 					this.hls.loadSource(newValue);
 					this.play()
