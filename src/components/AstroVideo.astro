@@ -36,41 +36,50 @@ const { src }  = Astro.props
 					if (this.hls) {
 						this.hls.destroy();
 					}
+					this.muted = true;
 					this.hls = new Hls({debug:true,enableWorker:false});
 					this.hls.attachMedia(this);
 					this.hls.loadSource(newValue);
+					this.play()
 					break;
 			}
 		}
 	}
 	customElements.define('hls-js', HLSPlayer, { extends: 'video' })
-
-	class AstroVideo extends HTMLElement {
-		constructor() {
-			super();
-
-			// Read the message from the data attribute
-			const videoSrc = this.dataset.src
-			var video = document.querySelector('video')
-
-			if(Hls.isSupported()) {
-				var hls = new Hls();
-				hls.loadSource(videoSrc);
-				hls.attachMedia(video);
-				video.play()
-			}
-		}
-	}
-	customElements.define('astro-video', AstroVideo);
 </script>
-<video autoplay is="hls-js" src={src}></video>
+<div class="bg-vid-container">
+	<video class="cover" autoplay muted is="hls-js" src={src}></video>
+</div>
 <style>
+.bg-vid-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+		position: fixed;
+		left:0;
+		top:0;
+    justify-content: center;
+    align-items: center;
+		z-index: -1;
+}
+
+video.cover {
+    width: 100%;
+    min-width: 240vh;
+    height: auto;
+}
+/* 
 	video {
 		position: fixed;
-		left: 0;
-		top: 0;
+		right: 0;
+		bottom: 0;
 		min-width: 100%;
 		min-height: 100%;
 		z-index: -10;
-	}
+		width: 100%;
+		height: 100vh;
+		margin: auto;
+		/* transform: translateX(calc((100% - 100vw) / 2)); */
+	} */
 </style>
